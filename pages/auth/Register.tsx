@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../../services/authService';
@@ -19,29 +18,41 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
     password_confirmation: '',
     terms: false
   });
-  const [error, setError] = useState('');
+  
+  // We'll use an object for errors to map them to specific inputs if needed
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [generalError, setGeneralError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+    setGeneralError('');
+
+    // Client-side validation
     if (formData.password !== formData.password_confirmation) {
-      setError("Passwords don't match");
+      setGeneralError("Passwords don't match");
       return;
-    }
-    if (!formData.terms) {
-       setError("Please agree to the Terms & Conditions");
-       return;
     }
 
     setLoading(true);
-    setError('');
     try {
+      // 1. Send registration data
       await authApi.register(formData);
+      
+      // 2. Fetch the newly created user profile using the token stored in register()
       const userRes = await authApi.getUser();
+      
+      // 3. Update global state and redirect
       setUser(userRes.data);
       navigate('/schools');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Try again.');
+      if (err.response?.status === 422) {
+        // Validation errors from Laravel (e.g., 'email already taken')
+        setErrors(err.response.data.errors);
+      } else {
+        setGeneralError(err.response?.data?.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -54,67 +65,83 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
          <h1 className="text-2xl font-bold text-secondary">Join Madrasati</h1>
       </div>
 
-      {error && <div className="bg-warning/10 text-warning p-3 rounded mb-4 text-sm font-medium">{error}</div>}
+      {/* General Error Alert */}
+      {generalError && (
+        <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm font-medium border border-red-200">
+          {generalError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Full Name */}
         <div>
           <label className="block text-sm font-medium text-textDark mb-1">Full Name *</label>
           <input 
             type="text" required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
+            className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.name ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
           />
+          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
         </div>
+
+        {/* Email Address */}
         <div>
           <label className="block text-sm font-medium text-textDark mb-1">Email Address *</label>
           <input 
             type="email" required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
+            className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.email ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
           />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
         </div>
+
+        {/* Phone Number */}
         <div>
           <label className="block text-sm font-medium text-textDark mb-1">Phone Number *</label>
           <input 
             type="tel" required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
+            placeholder="091-XXXXXXX"
+            className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.phone ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, phone: e.target.value})}
           />
+          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone[0]}</p>}
         </div>
-        <div>
-          <label className="block text-sm font-medium text-textDark mb-1">City/Area (Optional)</label>
-          <input 
-            type="text"
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
-            onChange={(e) => setFormData({...formData, city: e.target.value})}
-          />
+
+        {/* Password */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-textDark mb-1">Password *</label>
+            <input 
+              type="password" required
+              className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.password ? 'border-red-500' : ''}`}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-textDark mb-1">Confirm *</label>
+            <input 
+              type="password" required
+              className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
+              onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+            />
+          </div>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-textDark mb-1">Password *</label>
-          <input 
-            type="password" required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
-            onChange={(e) => setFormData({...formData, password: e.target.value})}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-textDark mb-1">Confirm Password *</label>
-          <input 
-            type="password" required
-            className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
-            onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
-          />
-        </div>
+        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password[0]}</p>}
+
         <div className="flex items-start gap-2 pt-2">
           <input 
             type="checkbox" required
-            className="mt-1"
+            className="mt-1 h-4 w-4 text-primary border-gray-300 rounded"
             onChange={(e) => setFormData({...formData, terms: e.target.checked})}
           />
-          <span className="text-xs text-textLight">I agree to the Terms & Conditions and understand how my data is handled.</span>
+          <span className="text-xs text-textLight leading-tight">
+            I agree to the Terms & Conditions and understand how my data is handled in accordance with Madrasati guidelines.
+          </span>
         </div>
+
         <button 
           disabled={loading}
+          type="submit"
           className="w-full bg-primary text-secondary font-bold py-3 rounded-lg hover:bg-yellow-500 transition shadow-sm disabled:opacity-50 mt-4"
         >
           {loading ? 'Creating Account...' : 'Register Account'}
