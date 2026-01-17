@@ -10,7 +10,7 @@ const AdminReports: React.FC = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await api.get('/api/admin/reports');
+        const res = await api.get('/admin/reports');
         setReports(res.data);
       } catch (e) {
         setReports([

@@ -47,5 +47,5 @@ export const authApi = {
    * GetUser: Fetches the currently authenticated user profile
    * Hits the Route::get('/user') in your api.php
    */
-  getUser: () => api.get('/api/user'),
+  getUser: () => api.get('/user'),
 };

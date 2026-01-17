@@ -14,8 +14,8 @@ const AdminSchools: React.FC = () => {
 
   const fetchSchools = async () => {
     try {
-      const res = await api.get('/api/admin/schools');
-      setSchools(res.data);
+      const res = await api.get('/admin/schools');
+      setSchools(res.data.data || res.data);
     } catch (e) {
       setSchools([
         { id: 1, name: 'Sunrise Academy', area: 'Downtown', category: 'General', level: 'K-12', slug: 'sunrise' } as any

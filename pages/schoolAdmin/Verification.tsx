@@ -10,7 +10,7 @@ const VerificationPage: React.FC = () => {
   useEffect(() => {
     const fetchPending = async () => {
       try {
-        const res = await api.get('/api/school-admin/pending-verification');
+        const res = await api.get('/school-admin/reviews');
         setReviews(res.data);
       } catch (e) {
         setReviews([
@@ -25,7 +25,7 @@ const VerificationPage: React.FC = () => {
 
   const handleAction = async (id: number, action: 'approve' | 'reject') => {
     try {
-      await api.post(`/api/school-admin/reviews/${id}/${action}`);
+      await api.post(`/school-admin/reviews/${id}/${action}`);
       setReviews(reviews.filter(r => r.id !== id));
       alert(`Review ${action}d successfully`);
     } catch (e) {

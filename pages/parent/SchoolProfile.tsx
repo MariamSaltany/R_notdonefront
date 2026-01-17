@@ -15,12 +15,9 @@ const SchoolProfile: React.FC<{ user: User | null }> = ({ user }) => {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const [schoolRes, reviewsRes] = await Promise.all([
-          api.get(`/api/schools/${slug}`),
-          api.get(`/api/schools/${slug}/reviews`)
-        ]);
-        setSchool(schoolRes.data);
-        setReviews(reviewsRes.data.filter((r: Review) => r.status === 'approved'));
+        const schoolRes = await api.get(`/schools/${slug}`);
+        setSchool(schoolRes.data.school);
+        setReviews(schoolRes.data.approvedReviews || []);
       } catch (e) {
         // Fallback mock
         setSchool({ id: 1, slug: 'sunrise-academy', name: 'Sunrise Academy', area: 'Downtown', category: 'International', level: 'K-12', gender_type: 'Mixed', email: 'info@sunrise.com', phone: '+1 234 567 890', address: '123 Educational Blvd, Downtown City', president_name: 'Dr. Sarah Wilson', fees_range: '$8,000 - $15,000', curriculum: 'British (IGCSE)' });
@@ -37,7 +34,7 @@ const SchoolProfile: React.FC<{ user: User | null }> = ({ user }) => {
   const handleReport = async () => {
     if (!reportModal.reason.trim()) return;
     try {
-      await api.post(`/api/reviews/${reportModal.reviewId}/report`, { reason: reportModal.reason });
+      await api.post(`/reviews/${reportModal.reviewId}/report`, { report_reason: reportModal.reason });
       alert('Report submitted successfully. Our team will review it.');
       setReportModal({ open: false, reviewId: null, reason: '' });
     } catch (e) {

@@ -25,7 +25,7 @@ const CreateReview: React.FC = () => {
 
     setLoading(true);
     try {
-      await api.post(`/api/schools/${slug}/reviews`, formData);
+      await api.post(`/schools/${slug}/reviews`, formData);
       alert('Review submitted for moderation!');
       navigate(`/schools/${slug}`);
     } catch (err: any) {

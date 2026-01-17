@@ -11,8 +11,8 @@ const MyReviews: React.FC = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await api.get('/api/parent/reviews');
-        setReviews(res.data);
+        const res = await api.get('/my-reviews');
+        setReviews(res.data.data || res.data);
       } catch (e) {
         // Mock
         setReviews([

@@ -12,7 +12,7 @@ const AdminModeration: React.FC = () => {
   useEffect(() => {
     const fetchPending = async () => {
       try {
-        const res = await api.get('/api/admin/pending-moderation');
+        const res = await api.get('/admin/moderation');
         setReviews(res.data);
       } catch (e) {
         setReviews([
@@ -39,7 +39,7 @@ const AdminModeration: React.FC = () => {
 
   const handleApprove = async (id: number) => {
     try {
-      await api.post(`/api/admin/reviews/${id}/approve`);
+      await api.post(`/admin/reviews/${id}/approve`);
       setReviews(reviews.filter(r => r.id !== id));
       alert('Review approved and sent to School Admin');
     } catch (e) {
@@ -51,7 +51,7 @@ const AdminModeration: React.FC = () => {
   const handleReject = async () => {
     if (!reason) return;
     try {
-      await api.post(`/api/admin/reviews/${rejectingId}/reject`, { reason });
+      await api.post(`/admin/reviews/${rejectingId}/reject`, { reason });
       setReviews(reviews.filter(r => r.id !== rejectingId));
       setRejectingId(null);
       setReason('');

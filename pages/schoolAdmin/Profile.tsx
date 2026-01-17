@@ -15,10 +15,10 @@ const SchoolAdminProfile: React.FC = () => {
     const fetchData = async () => {
       try {
         const [sRes, rRes] = await Promise.all([
-          api.get('/api/school-admin/profile'),
-          api.get('/api/school-admin/published-reviews')
+          api.get('/school-admin/profile'),
+          api.get('/school-admin/reviews')
         ]);
-        setSchool(sRes.data);
+        setSchool(sRes.data.school);
         setReviews(rRes.data);
         setPhotos([
           { id: 1, url: 'https://picsum.photos/400/300?random=1' },
@@ -38,8 +38,9 @@ const SchoolAdminProfile: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await api.put('/api/school-admin/profile', school);
+      const res = await api.patch('/school-admin/profile', school);
       alert('Profile updated successfully!');
+      setSchool(res.data.school);
     } catch (e) {
       alert('Update failed (Mock: Saved successfully)');
     } finally {

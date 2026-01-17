@@ -12,8 +12,8 @@ const SchoolsList: React.FC = () => {
   useEffect(() => {
     const fetchSchools = async () => {
       try {
-        const res = await api.get('/api/schools');
-        setSchools(res.data);
+        const res = await api.get('/schools');
+        setSchools(res.data.schools || []);
       } catch (e) {
         // Mock data if backend is not ready
         setSchools([
