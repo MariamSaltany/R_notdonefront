@@ -5,7 +5,7 @@ export const authApi = {
    * Login: Fetches CSRF cookie, posts credentials, and saves the token
    */
   login: async (credentials: any) => {
-    await getCsrfToken();
+    // CSRF token not needed since we disabled stateful API
     const response = await api.post('/login', credentials);
     
     // access_token comes from your AuthenticatedSessionController::store
@@ -20,7 +20,7 @@ export const authApi = {
    * Register: Similar to login, saves the token immediately after account creation
    */
   register: async (userData: any) => {
-    await getCsrfToken();
+    // CSRF token not needed since we disabled stateful API
     const response = await api.post('/register', userData);
     
     // token comes from your RegisteredUserController::store

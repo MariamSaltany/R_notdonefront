@@ -21,18 +21,15 @@ const Login: React.FC<LoginProps> = ({ setUser }) => {
 
     try {
       // 1. Call the login service (this now saves the token to localStorage)
-      await authApi.login({ email, password });
+      const loginRes = await authApi.login({ email, password });
 
-      // 2. Fetch the user profile
-      const userRes = await authApi.getUser();
+      // 2. Update the global user state with user data from login response
+      setUser(loginRes.data.user);
 
-      // 3. Update the global user state in App.tsx
-      setUser(userRes.data);
-
-      // 4. Redirect based on role (Benghazi School Logic)
-      if (userRes.data.role === 'super_admin') {
+      // 3. Redirect based on role
+      if (loginRes.data.user.role === 'super_admin') {
         navigate('/admin/reviews/moderation');
-      } else if (userRes.data.role === 'school_admin') {
+      } else if (loginRes.data.user.role === 'school_admin') {
         navigate('/school-admin/profile');
       } else {
         navigate('/schools');

@@ -16,7 +16,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
     city: '',
     password: '',
     password_confirmation: '',
-    terms: false
+    terms_accepted: false
   });
   
   // We'll use an object for errors to map them to specific inputs if needed
@@ -26,6 +26,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData);
     setErrors({});
     setGeneralError('');
 
@@ -37,16 +38,19 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
 
     setLoading(true);
     try {
-      // 1. Send registration data
-      await authApi.register(formData);
+      console.log('Calling authApi.register...');
+      // 1. Send registration data and get user info
+      const registerRes = await authApi.register(formData);
+      console.log('Registration response:', registerRes);
       
-      // 2. Fetch the newly created user profile using the token stored in register()
-      const userRes = await authApi.getUser();
+      // 2. Update global state with user data from registration response
+      setUser(registerRes.data.user);
+      console.log('User set, navigating to /schools');
       
-      // 3. Update global state and redirect
-      setUser(userRes.data);
+      // 3. Redirect to schools page
       navigate('/schools');
     } catch (err: any) {
+      console.error('Registration error:', err);
       if (err.response?.status === 422) {
         // Validation errors from Laravel (e.g., 'email already taken')
         setErrors(err.response.data.errors);
@@ -78,6 +82,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
           <label className="block text-sm font-medium text-textDark mb-1">Full Name *</label>
           <input 
             type="text" required
+            value={formData.name}
             className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.name ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, name: e.target.value})}
           />
@@ -89,6 +94,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
           <label className="block text-sm font-medium text-textDark mb-1">Email Address *</label>
           <input 
             type="email" required
+            value={formData.email}
             className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.email ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, email: e.target.value})}
           />
@@ -100,11 +106,24 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
           <label className="block text-sm font-medium text-textDark mb-1">Phone Number *</label>
           <input 
             type="tel" required
+            value={formData.phone}
             placeholder="091-XXXXXXX"
             className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.phone ? 'border-red-500' : ''}`}
             onChange={(e) => setFormData({...formData, phone: e.target.value})}
           />
           {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone[0]}</p>}
+        </div>
+
+        {/* City */}
+        <div>
+          <label className="block text-sm font-medium text-textDark mb-1">City (optional)</label>
+          <input 
+            type="text"
+            value={formData.city}
+            className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.city ? 'border-red-500' : ''}`}
+            onChange={(e) => setFormData({...formData, city: e.target.value})}
+          />
+          {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city[0]}</p>}
         </div>
 
         {/* Password */}
@@ -113,6 +132,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
             <label className="block text-sm font-medium text-textDark mb-1">Password *</label>
             <input 
               type="password" required
+              value={formData.password}
               className={`w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none ${errors.password ? 'border-red-500' : ''}`}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
             />
@@ -121,6 +141,7 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
             <label className="block text-sm font-medium text-textDark mb-1">Confirm *</label>
             <input 
               type="password" required
+              value={formData.password_confirmation}
               className="w-full border p-2 rounded focus:ring-2 focus:ring-primary outline-none"
               onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
             />
@@ -131,8 +152,9 @@ const Register: React.FC<RegisterProps> = ({ setUser }) => {
         <div className="flex items-start gap-2 pt-2">
           <input 
             type="checkbox" required
+            checked={formData.terms_accepted}
             className="mt-1 h-4 w-4 text-primary border-gray-300 rounded"
-            onChange={(e) => setFormData({...formData, terms: e.target.checked})}
+            onChange={(e) => setFormData({...formData, terms_accepted: e.target.checked})}
           />
           <span className="text-xs text-textLight leading-tight">
             I agree to the Terms & Conditions and understand how my data is handled in accordance with Madrasati guidelines.
